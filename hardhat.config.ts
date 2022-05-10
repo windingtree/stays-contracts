@@ -1,6 +1,5 @@
 import { HardhatUserConfig } from 'hardhat/types'
 
-import '@openzeppelin/hardhat-upgrades'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-solhint'
@@ -125,6 +124,13 @@ const config: HardhatUserConfig = {
     etherscan: {
       apiKey: process.env.ETHERSCAN_API_KEY
     }
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: 'node_modules/@windingtree/videre-contracts/artifacts/contracts'
+      }
+    ]
   }
 }
 
