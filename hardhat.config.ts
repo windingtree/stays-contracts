@@ -30,7 +30,11 @@ const config: HardhatUserConfig = {
     deployer: 0,
     alice: 1,
     bob: 2,
-    carol: 3
+    carol: 3,
+    api: 4,
+    bidder: 5,
+    manager: 6,
+    staff: 7
   },
   networks: {
     hardhat: {
@@ -118,7 +122,7 @@ const config: HardhatUserConfig = {
   docgen: {
     path: './docs',
     clear: true,
-    runOnCompile: true
+    runOnCompile: false
   },
   verify: {
     etherscan: {
