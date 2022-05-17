@@ -8,7 +8,13 @@ import { setupUser, setupUsers } from './utils'
 
 import { MockERC20, Stays } from '../typechain'
 import { bidask } from '@windingtree/videre-sdk/dist/cjs/eip712'
-import { GemJoin, LineRegistry, ServiceProviderRegistry, TimestampRegistry, Vat } from '@windingtree/videre-sdk/dist/cjs/typechain'
+import {
+  GemJoin,
+  LineRegistry,
+  ServiceProviderRegistry,
+  TimestampRegistry,
+  Vat
+} from '@windingtree/videre-sdk/dist/cjs/typechain'
 
 const WHITELIST_ROLE = utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'))
 const API_ROLE = 1
@@ -51,20 +57,84 @@ const setup = deployments.createFixture(async () => {
 
 describe('Stays', function () {
   // let users: ({ address: string } & { erc20: IERC20 })[]
-  let deployer: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let alice: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let bob: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let carol: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let api: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let bidder: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let manager: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
-  let staff: { address: string } & { erc20: MockERC20, vat: Vat, join: GemJoin, spRegistry: ServiceProviderRegistry, lRegistry: LineRegistry, tRegistry: TimestampRegistry, stays: Stays }
+  let deployer: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let alice: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let bob: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let carol: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let api: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let bidder: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let manager: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
+  let staff: { address: string } & {
+    erc20: MockERC20
+    vat: Vat
+    join: GemJoin
+    spRegistry: ServiceProviderRegistry
+    lRegistry: LineRegistry
+    tRegistry: TimestampRegistry
+    stays: Stays
+  }
 
   let serviceProvider: string
 
   beforeEach('load fixture', async () => {
     // eslint-disable-next-line @typescript-eslint/no-extra-semi
-    ; ({ deployer, alice, bob, carol, api, bidder, manager, staff } = await setup())
+    ;({ deployer, alice, bob, carol, api, bidder, manager, staff } = await setup())
 
     // authorise the Stays contract to use the `vat`
     await deployer.vat.rely(deployer.stays.address)
@@ -73,7 +143,11 @@ describe('Stays', function () {
     await deployer.vat.rely(deployer.join.address)
 
     // register the industry (line)
-    await deployer.lRegistry['file(bytes32,bytes32,address)'](utils.formatBytes32String('terms'), LINE, deployer.stays.address)
+    await deployer.lRegistry['file(bytes32,bytes32,address)'](
+      utils.formatBytes32String('terms'),
+      LINE,
+      deployer.stays.address
+    )
 
     // add bob to the whitelist for registering
     await deployer.spRegistry.grantRole(WHITELIST_ROLE, bob.address)
@@ -84,10 +158,22 @@ describe('Stays', function () {
     await bob.spRegistry.enroll(SP_SALT, SP_URI)
 
     // add roles
-    await bob.spRegistry.grantRole(utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])), api.address)
-    await bob.spRegistry.grantRole(utils.keccak256(utils.defaultAbiCoder.encode(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])), bidder.address)
-    await bob.spRegistry.grantRole(utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANGAER_ROLE])), manager.address)
-    await bob.spRegistry.grantRole(utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])), staff.address)
+    await bob.spRegistry.grantRole(
+      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),
+      api.address
+    )
+    await bob.spRegistry.grantRole(
+      utils.keccak256(utils.defaultAbiCoder.encode(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])),
+      bidder.address
+    )
+    await bob.spRegistry.grantRole(
+      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANGAER_ROLE])),
+      manager.address
+    )
+    await bob.spRegistry.grantRole(
+      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])),
+      staff.address
+    )
 
     // register the service provider with the line
     await bob.lRegistry.register(LINE, serviceProvider)
@@ -143,12 +229,10 @@ describe('Stays', function () {
       const bidRecords = {
         salt: utils.formatBytes32String('SALTHERE'),
         limit: 10,
-        expiry: Math.floor(Date.now() / 1000) + (60 * 20),
+        expiry: Math.floor(Date.now() / 1000) + 60 * 20,
         which: serviceProvider,
         params: encoder.hashStruct('Stay', stayTypes, stayRecords),
-        items: [
-          utils.arrayify(utils.formatBytes32String('ITEM-A'))
-        ],
+        items: [utils.arrayify(utils.formatBytes32String('ITEM-A'))],
         terms: [],
         options: {
           items: [],
@@ -163,10 +247,10 @@ describe('Stays', function () {
       }
 
       const stayAbiEncoded = utils.defaultAbiCoder.encode(
-        ['tuple(tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkIn,tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkOut,uint32 numPaxAdult,uint32 numPaxChild,uint32 numSpacesReq)'],
         [
-          stayRecords
-        ]
+          'tuple(tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkIn,tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkOut,uint32 numPaxAdult,uint32 numPaxChild,uint32 numSpacesReq)'
+        ],
+        [stayRecords]
       )
 
       const bidderSigner = await ethers.getSigner(bidder.address)
@@ -200,9 +284,7 @@ describe('Stays', function () {
           items: [],
           terms: []
         },
-        [
-          signature
-        ]
+        [signature]
       )
       // await expect().to.not.be.reverted
     })
