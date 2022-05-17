@@ -1,4 +1,3 @@
-import { Contract } from 'ethers'
 import { ethers } from 'hardhat'
 
 /**
@@ -7,7 +6,7 @@ import { ethers } from 'hardhat'
  * @param contracts contracts that are being connected to from a user
  * @returns an array of users with their connected contracts
  */
-export async function setupUsers<T extends { [contractName: string]: Contract }>(
+export async function setupUsers<T extends { [contractName: string]: any }>(
   addresses: string[],
   contracts: T
 ): Promise<({ address: string } & T)[]> {
@@ -24,7 +23,7 @@ export async function setupUsers<T extends { [contractName: string]: Contract }>
  * @param contracts contracts to connect to
  * @returns an object of connected contracts
  */
-export async function setupUser<T extends { [contractName: string]: Contract }>(
+export async function setupUser<T extends { [contractName: string]: any }>(
   address: string,
   contracts: T
 ): Promise<{ address: string } & T> {

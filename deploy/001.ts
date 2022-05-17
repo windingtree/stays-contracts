@@ -9,17 +9,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre
   const { deploy } = deployments
 
-  const { deployer, alice, bob, carol } = await getNamedAccounts()
-  vUtils.add(2, 3)
+  const { deployer, alice, bob, carol, api, bidder, manager, staff } = await getNamedAccounts()
 
   // --- Account listing ---
   console.log(`Deployer: ${deployer}`)
   console.log(`Alice: ${alice}`)
   console.log(`Bob: ${bob}`)
   console.log(`Carol: ${carol}`)
+  console.log(`API: ${api}`)
+  console.log(`BIDDER: ${bidder}`)
+  console.log(`MANAGER: ${manager}`)
+  console.log(`STAFF: ${staff}`)
 
   // --- Deploy the registries
   const timestampRegistryDeploy = await deploy('TimestampRegistry', {
+    from: deployer,
+    log: true,
+    autoMine: true
+  })
+
+  // deploy the test tokens
+  const mockERC20Deploy = await deploy('MockERC20', {
     from: deployer,
     log: true,
     autoMine: true
@@ -45,6 +55,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true
   })
 
+  const gemJoinDeploy = await deploy('GemJoin', {
+    from: deployer,
+    log: true,
+    autoMine: true,
+    args: [
+      'MockERC20GemJoin',
+      '1',
+      vatDeploy.address,
+      mockERC20Deploy.address
+    ]
+  })
+
   const staysDeploy = await deploy('Stays', {
     from: deployer,
     log: true,
@@ -54,7 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       serviceProviderRegistryDeploy.address,
       lineRegistryDeploy.address,
       utils.formatBytes32String('stays'),
-      'Stays',
+      'stays',
       '1'
     ]
   })
