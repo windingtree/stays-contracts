@@ -110,7 +110,7 @@ contract Stays is Context, EIP712 {
     // make sure the bidder's signature is valid for the provider
     bytes32 bidHash = LibVidere.hash(bid);
     require(
-      providers.can(bid.which, Role.BIDDER, ECDSA.recover(bidHash, sigs[0])),
+      providers.can(bid.which, Role.BIDDER, ECDSA.recover(_hashTypedDataV4(bidHash), sigs[0])),
       "Stays/invalid-bidder"
     );
 
