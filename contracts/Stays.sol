@@ -94,11 +94,13 @@ contract Stays is Context, EIP712 {
    */
   function deal(
     address gem,
-    LibVidere.Bid calldata bid,
-    bytes calldata params,
-    LibVidere.BidOptions calldata options,
-    bytes[] calldata sigs
+    LibVidere.Bid memory bid,
+    bytes memory params,
+    LibVidere.BidOptions memory options,
+    bytes[] memory sigs
   ) public payable validProvider(bid.which) returns (bytes32 stubId,bytes32) {
+    /// TODO: Make sure stays is a valid line
+
     /// @dev variable scoping used to avoid stack too deep errors
     ///      `stay` only needs to checked for validity, here and isn't
     //       required further on.
