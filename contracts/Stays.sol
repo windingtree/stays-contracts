@@ -168,7 +168,6 @@ contract Stays is Context, EIP712 {
     /// @dev Provides hash collision protection
     LibVidere.VoucherStorage storage stubStorage = state[stubId];
     require(stubStorage.state == bytes32(0), "Stays/stub-exists");
-    require(vat.owns(stubId) == address(0), "Vat/stub-exists");
 
     stubStorage.provider = bid.which;
     stubStorage.state = LibVidere.hash(stubState);
