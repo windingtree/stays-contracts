@@ -158,34 +158,30 @@ describe('Stays', function () {
     console.log('Setup serviceProvider:', serviceProvider)
 
     // use multicall to batch everything together in an atomic transaction for the service provider registry!
-    await bob.spRegistry.multicall(
-      [
-        // enroll
-        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('enroll', [
-          SP_SALT, SP_URI
-        ]),
-        // api-role
-        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
-          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),
-          api.address
-        ]),
-        // api-role
-        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
-          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])),
-          bidder.address
-        ]),
-        // api-role
-        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
-          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANAGER_ROLE])),
-          manager.address
-        ]),
-        // api-role
-        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
-          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])),
-          staff.address
-        ])
-      ]
-    )
+    await bob.spRegistry.multicall([
+      // enroll
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('enroll', [SP_SALT, SP_URI]),
+      // api-role
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+        utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),
+        api.address
+      ]),
+      // api-role
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+        utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])),
+        bidder.address
+      ]),
+      // api-role
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+        utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANAGER_ROLE])),
+        manager.address
+      ]),
+      // api-role
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+        utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])),
+        staff.address
+      ])
+    ])
 
     // register the service provider with the line
     await bob.lRegistry.register(LINE, serviceProvider)
