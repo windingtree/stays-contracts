@@ -12,6 +12,7 @@ import {
   GemJoin,
   LineRegistry,
   ServiceProviderRegistry,
+  ServiceProviderRegistry__factory,
   TimestampRegistry,
   Vat
 } from '@windingtree/videre-sdk/dist/cjs/typechain'
@@ -19,7 +20,7 @@ import {
 const WHITELIST_ROLE = utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'))
 const API_ROLE = 1
 const BIDDER_ROLE = 2
-const MANGAER_ROLE = 3
+const MANAGER_ROLE = 3
 const STAFF_ROLE = 4
 
 const LINE = utils.formatBytes32String('stays')
@@ -155,24 +156,35 @@ describe('Stays', function () {
     // register a service provider
     serviceProvider = await bob.spRegistry.callStatic.enroll(SP_SALT, SP_URI)
     console.log('Setup serviceProvider:', serviceProvider)
-    await bob.spRegistry.enroll(SP_SALT, SP_URI)
 
-    // add roles
-    await bob.spRegistry.grantRole(
-      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),
-      api.address
-    )
-    await bob.spRegistry.grantRole(
-      utils.keccak256(utils.defaultAbiCoder.encode(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])),
-      bidder.address
-    )
-    await bob.spRegistry.grantRole(
-      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANGAER_ROLE])),
-      manager.address
-    )
-    await bob.spRegistry.grantRole(
-      utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])),
-      staff.address
+    // use multicall to batch everything together in an atomic transaction for the service provider registry!
+    await bob.spRegistry.multicall(
+      [
+        // enroll
+        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('enroll', [
+          SP_SALT, SP_URI
+        ]),
+        // api-role
+        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),
+          api.address
+        ]),
+        // api-role
+        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, BIDDER_ROLE])),
+          bidder.address
+        ]),
+        // api-role
+        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, MANAGER_ROLE])),
+          manager.address
+        ]),
+        // api-role
+        ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
+          utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, STAFF_ROLE])),
+          staff.address
+        ])
+      ]
     )
 
     // register the service provider with the line
@@ -190,7 +202,7 @@ describe('Stays', function () {
       console.log('Service provider:', serviceProvider)
       expect(await deployer.spRegistry.can(serviceProvider, API_ROLE, api.address)).to.be.eq(true)
       expect(await deployer.spRegistry.can(serviceProvider, BIDDER_ROLE, bidder.address)).to.be.eq(true)
-      expect(await deployer.spRegistry.can(serviceProvider, MANGAER_ROLE, manager.address)).to.be.eq(true)
+      expect(await deployer.spRegistry.can(serviceProvider, MANAGER_ROLE, manager.address)).to.be.eq(true)
       expect(await deployer.spRegistry.can(serviceProvider, STAFF_ROLE, staff.address)).to.be.eq(true)
     })
   })
