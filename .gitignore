@@ -16,6 +16,7 @@ node_modules/
 artifacts/
 cache/
 typechain/
+typechain-videre/
 reports/
 coverage*
 inheritance-graph.dot

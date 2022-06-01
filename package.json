@@ -82,10 +82,12 @@
     "typescript": "^4.6.3"
   },
   "scripts": {
+    "typechain:videre-contracts": "npx typechain --target ethers-v5 --out-dir ./typechain-videre './node_modules/@windingtree/videre-contracts/artifacts/contracts/**/*.json'",
     "compile": "hardhat compile",
     "docgen": "hardhat docgen",
     "test": "hardhat test",
     "commit": "git-cz -S",
-    "changelog": "conventional-changelog -p angular -r 2 -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog -p angular -r 2 -i CHANGELOG.md -s",
+    "prepublish": "yarn typechain:videre-contracts && yarn compile"
   }
 }
