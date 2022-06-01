@@ -43,8 +43,8 @@ contract Stays is Context, EIP712 {
     }
 
     // --- data
-    /// @dev voucher id to voucher storage
-    mapping(bytes32 => LibVidere.VoucherStorage) public state;
+    /// @dev stub id to stub storage
+    mapping(bytes32 => LibVidere.StubStorage) public state;
     /// @dev bid id to nonce storage
     mapping(bytes32 => uint256) public nonce;
 
@@ -140,7 +140,7 @@ contract Stays is Context, EIP712 {
         }
 
         /// @dev Stub state for hashing
-        LibVidere.VoucherState memory stubState = LibVidere.VoucherState({
+        LibVidere.StubState memory stubState = LibVidere.StubState({
             which: bid.which,
             params: bid.params,
             items: bid.items,
@@ -163,7 +163,7 @@ contract Stays is Context, EIP712 {
 
         /// @dev Stub storage
         /// @dev Provides hash collision protection
-        LibVidere.VoucherStorage storage stubStorage = state[stubId];
+        LibVidere.StubStorage storage stubStorage = state[stubId];
         require(stubStorage.state == bytes32(0), 'Stays/stub-exists');
 
         stubStorage.provider = bid.which;
@@ -173,7 +173,7 @@ contract Stays is Context, EIP712 {
         /// @dev store all term links
         for (uint256 i = 0; i < stubState.terms.length; i++) {
             LibVidere.BidTerm memory term = stubState.terms[i];
-            stubStorage.terms[term.impl] = term.payload.length > 0 ? term.payload : abi.encode(uint256(1));
+            stubStorage.terms[term.impl] = term.txPayload;
         }
 
         return (stubId, stubStorage.state);
@@ -182,14 +182,14 @@ contract Stays is Context, EIP712 {
     // --- progress to another point in the lifecycle
     function jump(
         uint256 to,
-        LibVidere.VoucherState calldata stub,
+        LibVidere.StubState calldata stub,
         LibStays.Stay calldata stay,
         bytes[] calldata sigs
     ) external payable validProvider(stub.which) returns (bytes32) {}
 
     // --- finalize the stub
     function done(
-        LibVidere.VoucherState calldata stub,
+        LibVidere.StubState calldata stub,
         LibStays.Stay calldata stay,
         bytes[] calldata sigs
     ) external payable validProvider(stub.which) {}
