@@ -6,16 +6,10 @@ import { utils } from 'ethers'
 import { expect } from './chai-setup'
 import { setupUser, setupUsers } from './utils'
 
+import { GemJoin, LineRegistry, ServiceProviderRegistry, ServiceProviderRegistry__factory, TimestampRegistry, Vat } from '../typechain-videre'
+
 import { MockERC20, Stays } from '../typechain'
 import { bidask } from '@windingtree/videre-sdk/dist/cjs/eip712'
-import {
-  GemJoin,
-  LineRegistry,
-  ServiceProviderRegistry,
-  ServiceProviderRegistry__factory,
-  TimestampRegistry,
-  Vat
-} from '@windingtree/videre-sdk/dist/cjs/typechain'
 
 const WHITELIST_ROLE = utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'))
 const API_ROLE = 1
@@ -33,11 +27,11 @@ const setup = deployments.createFixture(async () => {
   const { deployer, alice, bob, carol, api, bidder, manager, staff } = await getNamedAccounts()
   const contracts = {
     erc20: (await ethers.getContract('MockERC20')) as MockERC20,
-    vat: (await ethers.getContract('Vat')) as unknown as Vat,
-    join: (await ethers.getContract('GemJoin')) as unknown as GemJoin,
-    spRegistry: (await ethers.getContract('ServiceProviderRegistry')) as unknown as ServiceProviderRegistry,
-    lRegistry: (await ethers.getContract('LineRegistry')) as unknown as LineRegistry,
-    tRegistry: (await ethers.getContract('TimestampRegistry')) as unknown as TimestampRegistry,
+    vat: (await ethers.getContract('Vat')) as Vat,
+    join: (await ethers.getContract('GemJoin')) as GemJoin,
+    spRegistry: (await ethers.getContract('ServiceProviderRegistry')) as ServiceProviderRegistry,
+    lRegistry: (await ethers.getContract('LineRegistry')) as LineRegistry,
+    tRegistry: (await ethers.getContract('TimestampRegistry')) as TimestampRegistry,
     stays: (await ethers.getContract('Stays')) as Stays
   }
   const users = await setupUsers(await getUnnamedAccounts(), contracts)
@@ -57,7 +51,6 @@ const setup = deployments.createFixture(async () => {
 })
 
 describe('Stays', function () {
-  // let users: ({ address: string } & { erc20: IERC20 })[]
   let deployer: { address: string } & {
     erc20: MockERC20
     vat: Vat
@@ -77,15 +70,6 @@ describe('Stays', function () {
     stays: Stays
   }
   let bob: { address: string } & {
-    erc20: MockERC20
-    vat: Vat
-    join: GemJoin
-    spRegistry: ServiceProviderRegistry
-    lRegistry: LineRegistry
-    tRegistry: TimestampRegistry
-    stays: Stays
-  }
-  let carol: { address: string } & {
     erc20: MockERC20
     vat: Vat
     join: GemJoin
@@ -135,7 +119,7 @@ describe('Stays', function () {
 
   beforeEach('load fixture', async () => {
     // eslint-disable-next-line @typescript-eslint/no-extra-semi
-    ;({ deployer, alice, bob, carol, api, bidder, manager, staff } = await setup())
+    ;({ deployer, alice, bob, api, bidder, manager, staff } = await setup())
 
     // authorise the Stays contract to use the `vat`
     await deployer.vat.rely(deployer.stays.address)
