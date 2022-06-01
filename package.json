@@ -21,12 +21,14 @@
     "type": "git",
     "url": "https://github.com/windingtree/stays-contracts"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "contracts",
     "!contracts/test",
     "artifacts/contracts/**/*.json",
-    "!artifacts/contracts/**/*.dbg.json",
-    "typechain"
+    "!artifacts/contracts/**/*.dbg.json"
   ],
   "engines": {
     "node": ">=10"
