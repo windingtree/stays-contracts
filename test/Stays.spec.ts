@@ -6,7 +6,14 @@ import { utils } from 'ethers'
 import { expect } from './chai-setup'
 import { setupUser, setupUsers } from './utils'
 
-import { GemJoin, LineRegistry, ServiceProviderRegistry, ServiceProviderRegistry__factory, TimestampRegistry, Vat } from '../typechain-videre'
+import {
+  GemJoin,
+  LineRegistry,
+  ServiceProviderRegistry,
+  ServiceProviderRegistry__factory,
+  TimestampRegistry,
+  Vat
+} from '../typechain-videre'
 
 import { MockERC20, Stays } from '../typechain'
 import { bidask } from '@windingtree/videre-sdk/dist/cjs/eip712'
