@@ -27,7 +27,6 @@ const STAFF_ROLE = 4
 const LINE = utils.formatBytes32String('stays')
 
 const SP_SALT = utils.arrayify(utils.formatBytes32String('SALT'))
-const SP_URI = 'URI'
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture(['Stays', 'Vat', 'TimestampRegistry', 'ServiceProviderRegistry', 'LineRegistry', 'GemJoin'])
@@ -145,13 +144,13 @@ describe('Stays', function () {
     await deployer.spRegistry.grantRole(WHITELIST_ROLE, bob.address)
 
     // register a service provider
-    serviceProvider = await bob.spRegistry.callStatic.enroll(SP_SALT, SP_URI)
+    serviceProvider = await bob.spRegistry.callStatic.enroll(SP_SALT)
     console.log('Setup serviceProvider:', serviceProvider)
 
     // use multicall to batch everything together in an atomic transaction for the service provider registry!
     await bob.spRegistry.multicall([
       // enroll
-      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('enroll', [SP_SALT, SP_URI]),
+      ServiceProviderRegistry__factory.createInterface().encodeFunctionData('enroll', [SP_SALT]),
       // api-role
       ServiceProviderRegistry__factory.createInterface().encodeFunctionData('grantRole', [
         utils.keccak256(utils.solidityPack(['bytes32', 'uint256'], [serviceProvider, API_ROLE])),

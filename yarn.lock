@@ -1678,20 +1678,21 @@
     "@webassemblyjs/ast" "1.11.1"
     "@xtuc/long" "4.2.2"
 
-"@windingtree/videre-contracts@^0.2.0-alpha.1":
-  version "0.2.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-0.2.0-alpha.1.tgz#94c2f5a350e775f9d0c82364c51a5f7c02808aea"
-  integrity sha512-51q0tgv2gzOyGNob8NhlTUZaSWMempNX2vN+IB3JDSnl8UqUFpvsZRMI1iji9IVzjFMA9ZfhiQ3RZD6rfb+6VQ==
+"@windingtree/videre-contracts@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-2.0.0.tgz#c8328681d830ebbed38c621afcd24f73ac9ff1c1"
+  integrity sha512-hMzMEaTQRl5N+J51gcJEtwZOAO3M1/ZGEtLtPdm/v8V1OutMHv3Aiqyvdx4zVpZWd4e+zj2pa4VCjI3Jte3Mbg==
   dependencies:
     "@openzeppelin/contracts" "^4.5.0"
 
-"@windingtree/videre-sdk@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@windingtree/videre-sdk/-/videre-sdk-0.5.0.tgz#29967c206b5f96fec74572388c660fe98330ff6c"
-  integrity sha512-+rHZFcWEN7z7+F4rzBJc9EEPZuWs86dzaWAXRosbibMH92tlQZYv5KAB6VAoPz3K+gasx786Wzr2/PGqkUsIsg==
+"@windingtree/videre-sdk@^0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@windingtree/videre-sdk/-/videre-sdk-0.7.2.tgz#7843f834aee58d363082858753daff02964cb844"
+  integrity sha512-YSsE0WV4VY3Qw/lgRrnp6ZaRMTpz86yttviZ96eJOepJzkgcQFWBXLh2R7pX0YoWSUXf3pUoONkweWxnl5N/Tg==
   dependencies:
     "@protobuf-ts/runtime" "^2.5.0"
     ethers "^5.6.5"
+    h3-js "^3.7.2"
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -4940,6 +4941,11 @@ growl@1.10.5:
   version "1.10.5"
   resolved "https://registry.npmjs.org/growl/-/growl-1.10.5.tgz"
   integrity sha512-qBr4OuELkhPenW6goKVXiv47US3clb3/IbuWF9KNKEijAy9oeHxU9IgzjvJhHkUzhaj7rOUD7+YGWqUjLp5oSA==
+
+h3-js@^3.7.2:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-3.7.2.tgz#61d4feb7bb42868ca9cdb2d5cf9d9dda94f9e5a3"
+  integrity sha512-LPjlHSwB9zQZrMqKloCZmmmt3yZzIK7nqPcXqwU93zT3TtYG6jP4tZBzAPouxut7lLjdFbMQ75wRBiKfpsnY7w==
 
 handlebars@^4.0.1, handlebars@^4.7.7:
   version "4.7.7"

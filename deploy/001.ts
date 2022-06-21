@@ -59,7 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     autoMine: true,
-    args: ['MockERC20GemJoin', '1', vatDeploy.address, mockERC20Deploy.address]
+    args: [vatDeploy.address, mockERC20Deploy.address]
   })
 
   const staysDeploy = await deploy('Stays', {
