@@ -1,16 +1,13 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DeployFunction } from 'hardhat-deploy/types';
-import { ethers } from 'hardhat';
-import { utils } from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types'
+import { DeployFunction } from 'hardhat-deploy/types'
+import { ethers } from 'hardhat'
+import { utils } from 'ethers'
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts, network } = hre
   const { deploy } = deployments
 
-  const {
-    deployer, alice, bob, carol,
-    api, bidder, manager, staff
-  } = await getNamedAccounts()
+  const { deployer, alice, bob, carol, api, bidder, manager, staff } = await getNamedAccounts()
 
   // --- Account listing ---
   console.log(`Deployer: ${deployer}`)
@@ -81,23 +78,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Test setup @todo move this feature to the separate script
 
   if (network.name !== 'hardhat') {
-    console.log(`Detected ${network.name}. Development setup is skipped`);
-    return;
+    console.log(`Detected ${network.name}. Development setup is skipped`)
+    return
   }
 
-  const WHITELIST_ROLE = ethers.utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'));
+  const WHITELIST_ROLE = ethers.utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'))
 
-  const vat = await ethers.getContract('Vat');
-  const vatContract = vat.connect(await ethers.getSigner(deployer));
+  const vat = await ethers.getContract('Vat')
+  const vatContract = vat.connect(await ethers.getSigner(deployer))
 
   // authorize the Stays contract to use the `vat`
-  await vatContract.rely(staysDeploy.address);
+  await vatContract.rely(staysDeploy.address)
 
   // authorize the GemJoin contract to use the `vat`
-  await vatContract.rely(gemJoinDeploy.address);
+  await vatContract.rely(gemJoinDeploy.address)
 
-  const lRegistry = await ethers.getContract('LineRegistry');
-  const lRegistryContract = lRegistry.connect(await ethers.getSigner(deployer));
+  const lRegistry = await ethers.getContract('LineRegistry')
+  const lRegistryContract = lRegistry.connect(await ethers.getSigner(deployer))
 
   // register the industry (line)
   await lRegistryContract['file(bytes32,bytes32,address)'](
@@ -106,8 +103,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     staysDeploy.address
   )
 
-  const serviceProviderRegistry = await ethers.getContract('ServiceProviderRegistry');
-  const serviceProviderRegistryContract = serviceProviderRegistry.connect(await ethers.getSigner(deployer));
+  const serviceProviderRegistry = await ethers.getContract('ServiceProviderRegistry')
+  const serviceProviderRegistryContract = serviceProviderRegistry.connect(await ethers.getSigner(deployer))
 
   // Whitelist some addresses
   const whitelist = await Promise.all([
@@ -117,7 +114,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
     'Whitelisted',
     resp.map((r) => r.events[0].args.account)
-  );
+  )
 }
 
 export default func
