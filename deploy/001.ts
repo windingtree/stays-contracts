@@ -1,15 +1,16 @@
-/* eslint-disable camelcase */
-import { HardhatRuntimeEnvironment } from 'hardhat/types'
-import { DeployFunction } from 'hardhat-deploy/types'
-import { ethers } from 'hardhat'
-import { utils } from 'ethers'
-import { utils as vUtils } from '@windingtree/videre-sdk'
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
+import { ethers } from 'hardhat';
+import { utils } from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre
+  const { deployments, getNamedAccounts, network } = hre
   const { deploy } = deployments
 
-  const { deployer, alice, bob, carol, api, bidder, manager, staff } = await getNamedAccounts()
+  const {
+    deployer, alice, bob, carol,
+    api, bidder, manager, staff
+  } = await getNamedAccounts()
 
   // --- Account listing ---
   console.log(`Deployer: ${deployer}`)
@@ -22,6 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`STAFF: ${staff}`)
 
   // --- Deploy the registries
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const timestampRegistryDeploy = await deploy('TimestampRegistry', {
     from: deployer,
     log: true,
@@ -76,29 +78,46 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ]
   })
 
-  /*const staysFacilityDeploy = await deploy('StaysFacility', {
-    from: deployer,
-    log: true,
-    autoMine: true, // speed up deployment on local network, no effect on live network.
-    args: ['videre-stays', '1']
-  })
+  // Test setup @todo move this feature to the separate script
 
-  const eip712TestDeploy = await deploy('EIP712Test', {
-    from: deployer,
-    log: true,
-    autoMine: true
-  })
-
-  if (staysFacilityDeploy.newlyDeployed) {
-    console.log(
-      `Contract StaysFacility deployed at ${staysFacilityDeploy.address} using ${staysFacilityDeploy.receipt?.gasUsed} gas`
-    )
+  if (network.name !== 'hardhat') {
+    console.log(`Detected ${network.name}. Development setup is skipped`);
+    return;
   }
 
-  if (eip712TestDeploy.newlyDeployed) {
-    const t: EIP712Test = (await ethers.getContract('EIP712Test') as EIP712Test).connect(deployer)
-    await t.test('0xad14be9b61541546e40287b09dc1d4b69867f1d86871729d7eabcaa6409c551544e591ac055988444db1f3d575e464bbe4abebcf45b12b18975d705b567dacab1c')
-  }*/
+  const WHITELIST_ROLE = ethers.utils.keccak256(utils.toUtf8Bytes('videre.roles.whitelist'));
+
+  const vat = await ethers.getContract('Vat');
+  const vatContract = vat.connect(await ethers.getSigner(deployer));
+
+  // authorize the Stays contract to use the `vat`
+  await vatContract.rely(staysDeploy.address);
+
+  // authorize the GemJoin contract to use the `vat`
+  await vatContract.rely(gemJoinDeploy.address);
+
+  const lRegistry = await ethers.getContract('LineRegistry');
+  const lRegistryContract = lRegistry.connect(await ethers.getSigner(deployer));
+
+  // register the industry (line)
+  await lRegistryContract['file(bytes32,bytes32,address)'](
+    utils.formatBytes32String('terms'),
+    utils.formatBytes32String('stays'),
+    staysDeploy.address
+  )
+
+  const serviceProviderRegistry = await ethers.getContract('ServiceProviderRegistry');
+  const serviceProviderRegistryContract = serviceProviderRegistry.connect(await ethers.getSigner(deployer));
+
+  // Whitelist some addresses
+  const whitelist = await Promise.all([
+    serviceProviderRegistryContract.grantRole(WHITELIST_ROLE, '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')
+  ])
+  const resp = await Promise.all(whitelist.map((w) => w.wait()))
+  console.log(
+    'Whitelisted',
+    resp.map((r) => r.events[0].args.account)
+  );
 }
 
 export default func
