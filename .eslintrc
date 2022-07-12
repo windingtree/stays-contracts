@@ -41,10 +41,12 @@
       "always"
     ],
     "semi": [
-      "error",
-      "never"
+      "off"
     ],
     "spaced-comment": [
+      "off"
+    ],
+    "padded-blocks": [
       "off"
     ],
     "no-prototype-builtins": [
