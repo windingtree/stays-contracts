@@ -7,7 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts, network } = hre
   const { deploy } = deployments
 
-  const { deployer, alice, bob, carol, api, bidder, manager, staff } = await getNamedAccounts()
+  const {
+    deployer, alice, bob, carol,
+    api, bidder, manager, staff
+  } = await getNamedAccounts()
 
   // --- Account listing ---
   console.log(`Deployer: ${deployer}`)
@@ -105,6 +108,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const serviceProviderRegistry = await ethers.getContract('ServiceProviderRegistry')
   const serviceProviderRegistryContract = serviceProviderRegistry.connect(await ethers.getSigner(deployer))
+
+  await serviceProviderRegistryContract.signer.sendTransaction({
+    to: '0xC4e9c5F7237b0B3ca877160F9CdFF62e8D48Dbfa',
+    value: ethers.utils.parseEther('1') // 1 ether
+  })
 
   // Whitelist some addresses
   const whitelist = await Promise.all([
