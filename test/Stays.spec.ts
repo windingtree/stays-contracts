@@ -244,12 +244,12 @@ describe('Stays', function () {
         ]
       }
 
-      const stayAbiEncoded = utils.defaultAbiCoder.encode(
-        [
-          'tuple(tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkIn,tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkOut,uint32 numPaxAdult,uint32 numPaxChild,uint32 numSpacesReq)'
-        ],
-        [stayRecords]
-      )
+      // const stayAbiEncoded = utils.defaultAbiCoder.encode(
+      //   [
+      //     'tuple(tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkIn,tuple(uint16 yr,uint8 mon,uint8 day,uint8 hr,uint8 min,uint8 sec) checkOut,uint32 numPaxAdult,uint32 numPaxChild,uint32 numSpacesReq)'
+      //   ],
+      //   [stayRecords]
+      // )
 
       const bidderSigner = await ethers.getSigner(bidder.address)
       console.log('Bidder signer address:', bidderSigner.address)
@@ -277,7 +277,7 @@ describe('Stays', function () {
       await alice.stays.deal(
         alice.erc20.address,
         bidRecords,
-        stayAbiEncoded,
+        stayRecords,
         {
           items: [],
           terms: []
