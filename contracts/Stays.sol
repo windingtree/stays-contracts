@@ -12,6 +12,7 @@ import { IServiceProviderRegistry, Role } from '@windingtree/videre-contracts/co
 import { ILineRegistry } from '@windingtree/videre-contracts/contracts/interfaces/ILineRegistry.sol';
 import { LibVidere } from '@windingtree/videre-contracts/contracts/libraries/LibVidere.sol';
 import { Vat } from '@windingtree/videre-contracts/contracts/treasury/vat.sol';
+import { GemJoin } from '@windingtree/videre-contracts/contracts/treasury/join.sol';
 
 import { LibStays } from './LibStays.sol';
 
@@ -85,16 +86,23 @@ contract Stays is Context, EIP712 {
   /// @dev Line registry
   ILineRegistry public lines;
 
-  uint256 public live; // Active flag
-  bytes32 public immutable line; // The videre line code, eg. "stays"
+  /// @dev Active flag
+  uint256 public live;
+
+  /// @dev The videre line code, eg. "stays"
+  bytes32 public immutable line;
 
   /// @dev Allowed transitions table
   mapping(Step => Step[]) internal transitionTable;
+
+  /// @dev Grace period of cancellation
+  uint256 public gracePeriod;
 
   // --- events
 
   event Deal(bytes32 indexed stubId, bytes32 indexed which);
   event Jump(bytes32 indexed stubId, Step from, Step to);
+  event Cancel(bytes32 indexed stubId, Step step);
 
   // --- modifiers
 
@@ -163,11 +171,16 @@ contract Stays is Context, EIP712 {
     wards[usr] = 0;
   }
 
-  // --- admin
+  // --- admin functions
+
   function file(bytes32 what, address data) external auth {
     if (what == 'vat') vat = Vat(data);
     else if (what == 'providers') providers = IServiceProviderRegistry(data);
     else if (what == 'lines') lines = ILineRegistry(data);
+  }
+
+  function file(bytes32 what, uint256 data) external auth {
+    if (what == 'gracePeriod') gracePeriod = data;
   }
 
   // --- state engine
@@ -257,6 +270,7 @@ contract Stays is Context, EIP712 {
     stubStorage.provider = bid.which;
     stubStorage.state = LibVidere.hash(stubState);
     stubStorage.step = uint256(Step.INITIAL);
+    stubStorage.timestamp = block.timestamp;
 
     emit Jump(stubId, Step.UNINITIALIZED, Step.INITIAL);
 
@@ -274,21 +288,24 @@ contract Stays is Context, EIP712 {
   /// @param to Next step
   /// @param stub StubState
   /// @param stay Stay
+  /// @param join A proper GemJoin implementation
   /// @param sigs with a minimum of 1 sig from the service provider or buyer
   function jump(
     bytes32 stubId,
     Step to,
     LibVidere.StubState calldata stub,
     LibStays.Stay calldata stay,
+    address join,
     bytes[] calldata sigs
   ) external payable validProvider(stub.which) {
+    LibVidere.StubStorage storage stubStorage = state[stubId];
+    require(stubStorage.state != bytes32(0), 'Stays/unknown-stub');
+
+    uint256 prevStep = stubStorage.step;
+    Caller calledBy;
+
     /// @dev variable scoping used to avoid stack too deep errors
     {
-      LibVidere.StubStorage storage stubStorage = state[stubId];
-      require(stubStorage.state == bytes32(0), 'Stays/stub-exists');
-
-      Caller calledBy;
-
       // make sure the stuffs's signature is valid
       bytes32 stubHash = LibVidere.hash(stub);
       // will throw if signature is invalid
@@ -305,7 +322,7 @@ contract Stays is Context, EIP712 {
       }
 
       // Caller must be known
-      require(calledBy != Caller.UNKNOWN, 'Stays/invalid-caller');
+      require(calledBy != Caller.UNKNOWN, 'Stays/not-authorized');
 
       // If caller is a smart contract it must be authorized
       if (Address.isContract(_msgSender())) {
@@ -341,31 +358,60 @@ contract Stays is Context, EIP712 {
 
     // Step: CANCELLED_SUPPLIER_GRACE
     // Allowed for: BIDDER
-    // - close the deal
-    // - refund funds to buyer
-    // - emit Cancelled
+    // - check grace period
+    // - refund funds to buyer (including protocol fees)
+    // - move the deal to the CANCELLED_SUPPLIER_GRACE
+    // - emit Cancel(bytes32 stubId, Step step)
+    {
+      if (stubStorage.step == uint256(Step.CANCELLED_SUPPLIER_GRACE)) {
+        require(calledBy == Caller.BIDDER, 'Stays/not-authorized');
+        require(
+          stubStorage.timestamp + gracePeriod <= block.timestamp,
+          'Stays/not-allowed'
+        );
+        vat.suck(stubId, address(this), stub.cost.gem, stub.cost.wad, 0);
+        GemJoin(join).exit(vat.owns(stubId), stub.cost.wad);
+        emit Cancel(stubId, Step.CANCELLED_SUPPLIER_GRACE);
+      }
+    }
 
     // Step: CANCELLED_SUPPLIER
     // Allowed for: ADMIN
+    // - check previous step and prepare funds according to this step
+    // - refund funds to buyer (including protocol fees)
+    // - apply penalty on supplier (???)
+    // - emit Cancel(bytes32 stubId, Step step)
+    {
+      if (stubStorage.step == uint256(Step.CANCELLED_SUPPLIER)) {
+        require(calledBy == Caller.ADMIN, 'Stays/not-authorized');
+      }
+    }
 
     // Step: CANCELLED_BUYER
     // Allowed for: BUYER
+    // - refund funds to buyer (except for protocol fees)
+    // - emit Cancel(bytes32 stubId, Step step)
 
     // Step: CHECKED_IN
     // Allowed for: STAFF, BUYER
+    // - transfer part of funds (??? %) to the supplier from the escrow
+    // - emit CheckedIn(bytes32 stubId, bytes32 facilityId, address by)
 
     // Step: FULFILLED
     // Allowed for: STAFF
+    // - transfer rest of funds to the supplier from the escrow
+    // - emit Fulfilled(bytes32 stubId, bytes32 facilityId, address by)
 
     // Step: DISPUTED
     // Allowed for: STAFF, ADMIN, BUYER
+    // - emit Disputed(bytes32 stubId, bytes32 facilityId, bytes32 disputeId)
   }
 
   // --- resolve disputed `deal`
   // Can be called by the authorized contract only
   /// @param stubId Unique stub Id
   /// @param to Next step
-  function jump(
+  function resolve(
     bytes32 stubId,
     Step to
   ) external payable auth {
@@ -383,11 +429,18 @@ contract Stays is Context, EIP712 {
       'Stays/not-allowed'
     );
 
+    emit Jump(stubId, Step(stubStorage.step), to);
+    stubStorage.step = uint256(to);
+
     // Step: RESOLVED_SUPPLIER
     // Allowed for: Authorized contract
+    // - apply resolution logic
+    // - emit Resolved(bytes32 stubId, bytes32 facilityId, bytes32 disputeId)
 
     // Step: RESOLVED_BUYER
     // Allowed for: Authorized contract
+    // - apply resolution logic
+    // - emit Resolved(bytes32 stubId, bytes32 facilityId, bytes32 disputeId)
   }
 
   // --- helpers
