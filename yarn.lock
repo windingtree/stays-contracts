@@ -2315,10 +2315,10 @@
     "@webassemblyjs/ast" "1.11.1"
     "@xtuc/long" "4.2.2"
 
-"@windingtree/videre-contracts@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-2.0.0.tgz#c8328681d830ebbed38c621afcd24f73ac9ff1c1"
-  integrity sha512-hMzMEaTQRl5N+J51gcJEtwZOAO3M1/ZGEtLtPdm/v8V1OutMHv3Aiqyvdx4zVpZWd4e+zj2pa4VCjI3Jte3Mbg==
+"@windingtree/videre-contracts@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-2.1.0.tgz#e1c66de72a4234d5fc903f56d04efe46d5d72148"
+  integrity sha512-p29l2A07C7OCDhqpYSCWGuNPyAzHR1aUaGwQ5PxFU7UGQdv3oVyOrHdi4dDbuRexbPfD/db6whwwupxxCsB2aw==
   dependencies:
     "@openzeppelin/contracts" "^4.5.0"
 
